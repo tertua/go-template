@@ -3,7 +3,7 @@
 APP_NAME = apiserver
 BUILD_DIR = $(PWD)/build
 MIGRATIONS_FOLDER = $(PWD)/platform/migrations
-DATABASE_URL = postgres://postgres:password@cgapp-postgres/postgres?sslmode=disable
+DATABASE_URL = postgres://postgres:password@template-postgres/postgres?sslmode=disable
 
 clean:
 	rm -rf ./build
@@ -39,23 +39,23 @@ migrate.force:
 docker.run: docker.network docker.postgres swag docker.fiber docker.redis migrate.up
 
 docker.network:
-	docker network inspect dev-network >/dev/null 2>&1 || \
-	docker network create -d bridge dev-network
+	docker network inspect template-network >/dev/null 2>&1 || \
+	docker network create -d bridge template-network
 
 docker.fiber.build:
-	docker build -t fiber .
+	docker build -t apiserver .
 
 docker.fiber: docker.fiber.build
 	docker run --rm -d \
-		--name cgapp-fiber \
-		--network dev-network \
+		--name template-fiber \
+		--network template-network \
 		-p 5000:5000 \
-		fiber
+		apiserver
 
 docker.postgres:
 	docker run --rm -d \
-		--name cgapp-postgres \
-		--network dev-network \
+		--name template-postgres \
+		--network template-network \
 		-e POSTGRES_USER=postgres \
 		-e POSTGRES_PASSWORD=password \
 		-e POSTGRES_DB=postgres \
@@ -65,21 +65,21 @@ docker.postgres:
 
 docker.redis:
 	docker run --rm -d \
-		--name cgapp-redis \
-		--network dev-network \
+		--name template-redis \
+		--network template-network \
 		-p 6379:6379 \
 		redis
 
 docker.stop: docker.stop.fiber docker.stop.postgres docker.stop.redis
 
 docker.stop.fiber:
-	docker stop cgapp-fiber
+	docker stop template-fiber
 
 docker.stop.postgres:
-	docker stop cgapp-postgres
+	docker stop template-postgres
 
 docker.stop.redis:
-	docker stop cgapp-redis
+	docker stop template-redis
 
 swag:
 	swag init
