@@ -9,7 +9,13 @@ Stack: Go 1.27, [Fiber v3](https://gofiber.io/), PostgreSQL (`pgx/v5`) / MySQL, 
 ## ⚡️ Quick start
 
 1. Buat project baru dari template ini (tombol **Use this template**), lalu clone.
-2. Salin `.env.example` menjadi `.env` dan isi sesuai kebutuhan.
+2. Bootstrap sekali-jalan (ganti module path, reset README+LICENSE, bersihkan git history):
+
+```bash
+./init.sh --module github.com/tertua/namaproject --author "Nama Kamu"
+```
+
+3. Salin `.env.example` menjadi `.env` dan isi sesuai kebutuhan.
 3. Install [Docker](https://www.docker.com/get-started) dan tools berikut:
 
    - [golang-migrate/migrate](https://github.com/golang-migrate/migrate#cli-usage) untuk menjalankan migrasi
