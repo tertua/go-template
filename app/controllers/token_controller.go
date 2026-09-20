@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/create-go-app/fiber-go-template/app/models"
-	"github.com/create-go-app/fiber-go-template/pkg/utils"
-	"github.com/create-go-app/fiber-go-template/platform/cache"
-	"github.com/create-go-app/fiber-go-template/platform/database"
+	"github.com/tertua/go-template/app/models"
+	"github.com/tertua/go-template/pkg/utils"
+	"github.com/tertua/go-template/platform/cache"
+	"github.com/tertua/go-template/platform/database"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 // RenewTokens method for renew access and refresh tokens.
@@ -22,7 +22,7 @@ import (
 // @Success 200 {string} status "ok"
 // @Security ApiKeyAuth
 // @Router /v1/token/renew [post]
-func RenewTokens(c *fiber.Ctx) error {
+func RenewTokens(c fiber.Ctx) error {
 	// Get now time.
 	now := time.Now().Unix()
 
@@ -52,7 +52,7 @@ func RenewTokens(c *fiber.Ctx) error {
 	renew := &models.Renew{}
 
 	// Checking received data from JSON body.
-	if err := c.BodyParser(renew); err != nil {
+	if err := c.Bind().Body(renew); err != nil {
 		// Return, if JSON data is not correct.
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": true,

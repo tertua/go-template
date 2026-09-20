@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/create-go-app/fiber-go-template/app/models"
-	"github.com/create-go-app/fiber-go-template/pkg/utils"
-	"github.com/create-go-app/fiber-go-template/platform/cache"
-	"github.com/create-go-app/fiber-go-template/platform/database"
+	"github.com/tertua/go-template/app/models"
+	"github.com/tertua/go-template/pkg/utils"
+	"github.com/tertua/go-template/platform/cache"
+	"github.com/tertua/go-template/platform/database"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 )
 
@@ -24,12 +24,12 @@ import (
 // @Param user_role body string true "User role"
 // @Success 200 {object} models.User
 // @Router /v1/user/sign/up [post]
-func UserSignUp(c *fiber.Ctx) error {
+func UserSignUp(c fiber.Ctx) error {
 	// Create a new user auth struct.
 	signUp := &models.SignUp{}
 
 	// Checking received data from JSON body.
-	if err := c.BodyParser(signUp); err != nil {
+	if err := c.Bind().Body(signUp); err != nil {
 		// Return status 400 and error message.
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": true,
@@ -119,12 +119,12 @@ func UserSignUp(c *fiber.Ctx) error {
 // @Param password body string true "User Password"
 // @Success 200 {string} status "ok"
 // @Router /v1/user/sign/in [post]
-func UserSignIn(c *fiber.Ctx) error {
+func UserSignIn(c fiber.Ctx) error {
 	// Create a new user auth struct.
 	signIn := &models.SignIn{}
 
 	// Checking received data from JSON body.
-	if err := c.BodyParser(signIn); err != nil {
+	if err := c.Bind().Body(signIn); err != nil {
 		// Return status 400 and error message.
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": true,
@@ -225,7 +225,7 @@ func UserSignIn(c *fiber.Ctx) error {
 // @Success 204 {string} status "ok"
 // @Security ApiKeyAuth
 // @Router /v1/user/sign/out [post]
-func UserSignOut(c *fiber.Ctx) error {
+func UserSignOut(c fiber.Ctx) error {
 	// Get claims from JWT.
 	claims, err := utils.ExtractTokenMetadata(c)
 	if err != nil {

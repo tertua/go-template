@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
@@ -51,7 +51,7 @@ func TestPublicRoutes(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 
 		// Perform the request plain with the app.
-		resp, err := app.Test(req, -1) // the -1 disables request latency
+		resp, err := app.Test(req, fiber.TestConfig{Timeout: 0, FailOnTimeout: false}) // the -1 disables request latency
 
 		// Verify, that no error occurred, that is not expected
 		assert.Equalf(t, test.expectedError, err != nil, test.description)

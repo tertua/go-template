@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/create-go-app/fiber-go-template/pkg/utils"
+	"github.com/tertua/go-template/pkg/utils"
 
 	"github.com/jmoiron/sqlx"
 
-	_ "github.com/jackc/pgx/v4/stdlib" // load pgx driver for PostgreSQL
+	_ "github.com/jackc/pgx/v5/stdlib" // load pgx driver for PostgreSQL
 )
 
 // PostgreSQLConnection func for connection to PostgreSQL database.

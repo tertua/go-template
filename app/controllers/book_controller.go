@@ -3,11 +3,11 @@ package controllers
 import (
 	"time"
 
-	"github.com/create-go-app/fiber-go-template/app/models"
-	"github.com/create-go-app/fiber-go-template/pkg/repository"
-	"github.com/create-go-app/fiber-go-template/pkg/utils"
-	"github.com/create-go-app/fiber-go-template/platform/database"
-	"github.com/gofiber/fiber/v2"
+	"github.com/tertua/go-template/app/models"
+	"github.com/tertua/go-template/pkg/repository"
+	"github.com/tertua/go-template/pkg/utils"
+	"github.com/tertua/go-template/platform/database"
+	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 )
 
@@ -19,7 +19,7 @@ import (
 // @Produce json
 // @Success 200 {array} models.Book
 // @Router /v1/books [get]
-func GetBooks(c *fiber.Ctx) error {
+func GetBooks(c fiber.Ctx) error {
 	// Create database connection.
 	db, err := database.OpenDBConnection()
 	if err != nil {
@@ -60,7 +60,7 @@ func GetBooks(c *fiber.Ctx) error {
 // @Param id path string true "Book ID"
 // @Success 200 {object} models.Book
 // @Router /v1/book/{id} [get]
-func GetBook(c *fiber.Ctx) error {
+func GetBook(c fiber.Ctx) error {
 	// Catch book ID from URL.
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
@@ -112,7 +112,7 @@ func GetBook(c *fiber.Ctx) error {
 // @Success 200 {object} models.Book
 // @Security ApiKeyAuth
 // @Router /v1/book [post]
-func CreateBook(c *fiber.Ctx) error {
+func CreateBook(c fiber.Ctx) error {
 	// Get now time.
 	now := time.Now().Unix()
 
@@ -154,7 +154,7 @@ func CreateBook(c *fiber.Ctx) error {
 	book := &models.Book{}
 
 	// Check, if received JSON data is valid.
-	if err := c.BodyParser(book); err != nil {
+	if err := c.Bind().Body(book); err != nil {
 		// Return status 400 and error message.
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": true,
@@ -222,7 +222,7 @@ func CreateBook(c *fiber.Ctx) error {
 // @Success 202 {string} status "ok"
 // @Security ApiKeyAuth
 // @Router /v1/book [put]
-func UpdateBook(c *fiber.Ctx) error {
+func UpdateBook(c fiber.Ctx) error {
 	// Get now time.
 	now := time.Now().Unix()
 
@@ -264,7 +264,7 @@ func UpdateBook(c *fiber.Ctx) error {
 	book := &models.Book{}
 
 	// Check, if received JSON data is valid.
-	if err := c.BodyParser(book); err != nil {
+	if err := c.Bind().Body(book); err != nil {
 		// Return status 400 and error message.
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": true,
@@ -345,7 +345,7 @@ func UpdateBook(c *fiber.Ctx) error {
 // @Success 204 {string} status "ok"
 // @Security ApiKeyAuth
 // @Router /v1/book [delete]
-func DeleteBook(c *fiber.Ctx) error {
+func DeleteBook(c fiber.Ctx) error {
 	// Get now time.
 	now := time.Now().Unix()
 
@@ -387,7 +387,7 @@ func DeleteBook(c *fiber.Ctx) error {
 	book := &models.Book{}
 
 	// Check, if received JSON data is valid.
-	if err := c.BodyParser(book); err != nil {
+	if err := c.Bind().Body(book); err != nil {
 		// Return status 400 and error message.
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": true,
