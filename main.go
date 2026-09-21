@@ -1,12 +1,14 @@
 package main
 
 import (
+	"log"
 	"os"
 
 	"github.com/tertua/go-template/pkg/configs"
 	"github.com/tertua/go-template/pkg/middleware"
 	"github.com/tertua/go-template/pkg/routes"
 	"github.com/tertua/go-template/pkg/utils"
+	"github.com/tertua/go-template/platform/database"
 
 	"github.com/gofiber/fiber/v3"
 
@@ -36,6 +38,11 @@ func main() {
 
 	// Middlewares.
 	middleware.FiberMiddleware(app) // Register Fiber's middleware for app.
+
+	// Migrate database schema (SQLite file is auto-created on first run).
+	if err := database.Migrate(); err != nil {
+		log.Fatal("failed to migrate database: ", err)
+	}
 
 	// Routes.
 	routes.SwaggerRoute(app)  // Register a route for API Docs (Swagger).

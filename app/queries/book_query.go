@@ -1,14 +1,14 @@
 package queries
 
 import (
-	"github.com/tertua/go-template/app/models"
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
+	"github.com/tertua/go-template/app/models"
+	"gorm.io/gorm"
 )
 
 // BookQueries struct for queries from Book model.
 type BookQueries struct {
-	*sqlx.DB
+	*gorm.DB
 }
 
 // GetBooks method for getting all books.
@@ -16,12 +16,8 @@ func (q *BookQueries) GetBooks() ([]models.Book, error) {
 	// Define books variable.
 	books := []models.Book{}
 
-	// Define query string.
-	query := `SELECT * FROM books`
-
 	// Send query to database.
-	err := q.Select(&books, query)
-	if err != nil {
+	if err := q.Find(&books).Error; err != nil {
 		// Return empty object and error.
 		return books, err
 	}
@@ -35,12 +31,8 @@ func (q *BookQueries) GetBooksByAuthor(author string) ([]models.Book, error) {
 	// Define books variable.
 	books := []models.Book{}
 
-	// Define query string.
-	query := `SELECT * FROM books WHERE author = $1`
-
 	// Send query to database.
-	err := q.Get(&books, query, author)
-	if err != nil {
+	if err := q.Where("author = ?", author).Find(&books).Error; err != nil {
 		// Return empty object and error.
 		return books, err
 	}
@@ -54,12 +46,8 @@ func (q *BookQueries) GetBook(id uuid.UUID) (models.Book, error) {
 	// Define book variable.
 	book := models.Book{}
 
-	// Define query string.
-	query := `SELECT * FROM books WHERE id = $1`
-
 	// Send query to database.
-	err := q.Get(&book, query, id)
-	if err != nil {
+	if err := q.Where("id = ?", id).First(&book).Error; err != nil {
 		// Return empty object and error.
 		return book, err
 	}
@@ -70,12 +58,8 @@ func (q *BookQueries) GetBook(id uuid.UUID) (models.Book, error) {
 
 // CreateBook method for creating book by given Book object.
 func (q *BookQueries) CreateBook(b *models.Book) error {
-	// Define query string.
-	query := `INSERT INTO books VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
-
 	// Send query to database.
-	_, err := q.Exec(query, b.ID, b.CreatedAt, b.UpdatedAt, b.UserID, b.Title, b.Author, b.BookStatus, b.BookAttrs)
-	if err != nil {
+	if err := q.Create(b).Error; err != nil {
 		// Return only error.
 		return err
 	}
@@ -86,12 +70,14 @@ func (q *BookQueries) CreateBook(b *models.Book) error {
 
 // UpdateBook method for updating book by given Book object.
 func (q *BookQueries) UpdateBook(id uuid.UUID, b *models.Book) error {
-	// Define query string.
-	query := `UPDATE books SET updated_at = $2, title = $3, author = $4, book_status = $5, book_attrs = $6 WHERE id = $1`
-
 	// Send query to database.
-	_, err := q.Exec(query, id, b.UpdatedAt, b.Title, b.Author, b.BookStatus, b.BookAttrs)
-	if err != nil {
+	if err := q.Model(&models.Book{}).Where("id = ?", id).Updates(map[string]interface{}{
+		"updated_at":  b.UpdatedAt,
+		"title":       b.Title,
+		"author":      b.Author,
+		"book_status": b.BookStatus,
+		"book_attrs":  b.BookAttrs,
+	}).Error; err != nil {
 		// Return only error.
 		return err
 	}
@@ -102,12 +88,8 @@ func (q *BookQueries) UpdateBook(id uuid.UUID, b *models.Book) error {
 
 // DeleteBook method for delete book by given ID.
 func (q *BookQueries) DeleteBook(id uuid.UUID) error {
-	// Define query string.
-	query := `DELETE FROM books WHERE id = $1`
-
 	// Send query to database.
-	_, err := q.Exec(query, id)
-	if err != nil {
+	if err := q.Where("id = ?", id).Delete(&models.Book{}).Error; err != nil {
 		// Return only error.
 		return err
 	}

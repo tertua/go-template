@@ -12,27 +12,6 @@ func ConnectionURLBuilder(n string) (string, error) {
 
 	// Switch given names.
 	switch n {
-	case "postgres":
-		// URL for PostgreSQL connection.
-		url = fmt.Sprintf(
-			"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-			os.Getenv("DB_HOST"),
-			os.Getenv("DB_PORT"),
-			os.Getenv("DB_USER"),
-			os.Getenv("DB_PASSWORD"),
-			os.Getenv("DB_NAME"),
-			os.Getenv("DB_SSL_MODE"),
-		)
-	case "mysql":
-		// URL for Mysql connection.
-		url = fmt.Sprintf(
-			"%s:%s@tcp(%s:%s)/%s",
-			os.Getenv("DB_USER"),
-			os.Getenv("DB_PASSWORD"),
-			os.Getenv("DB_HOST"),
-			os.Getenv("DB_PORT"),
-			os.Getenv("DB_NAME"),
-		)
 	case "redis":
 		// URL for Redis connection.
 		url = fmt.Sprintf(

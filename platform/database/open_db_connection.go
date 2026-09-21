@@ -1,10 +1,11 @@
 package database
 
 import (
-	"os"
+	"sync"
 
+	"github.com/tertua/go-template/app/models"
 	"github.com/tertua/go-template/app/queries"
-	"github.com/jmoiron/sqlx"
+	"gorm.io/gorm"
 )
 
 // Queries struct for collect all app queries.
@@ -13,25 +14,23 @@ type Queries struct {
 	*queries.BookQueries // load queries from Book model
 }
 
+var (
+	sharedDB  *gorm.DB
+	sharedErr error
+	dbOnce    sync.Once
+)
+
+// openShared opens the database handle once per process.
+func openShared() (*gorm.DB, error) {
+	dbOnce.Do(func() {
+		sharedDB, sharedErr = chooseDB("SQL_DSN")
+	})
+	return sharedDB, sharedErr
+}
+
 // OpenDBConnection func for opening database connection.
 func OpenDBConnection() (*Queries, error) {
-	// Define Database connection variables.
-	var (
-		db  *sqlx.DB
-		err error
-	)
-
-	// Get DB_TYPE value from .env file.
-	dbType := os.Getenv("DB_TYPE")
-
-	// Define a new Database connection with right DB type.
-	switch dbType {
-	case "pgx":
-		db, err = PostgreSQLConnection()
-	case "mysql":
-		db, err = MysqlConnection()
-	}
-
+	db, err := openShared()
 	if err != nil {
 		return nil, err
 	}
@@ -41,4 +40,17 @@ func OpenDBConnection() (*Queries, error) {
 		UserQueries: &queries.UserQueries{DB: db}, // from User model
 		BookQueries: &queries.BookQueries{DB: db}, // from Book model
 	}, nil
+}
+
+// Migrate creates or updates tables from models.
+func Migrate() error {
+	db, err := openShared()
+	if err != nil {
+		return err
+	}
+
+	return db.AutoMigrate(
+		&models.User{},
+		&models.Book{},
+	)
 }
