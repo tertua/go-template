@@ -18,18 +18,20 @@ Stack: Go 1.27, [Fiber v3](https://gofiber.io/), PostgreSQL / SQLite (via GORM, 
 3. Salin `.env.example` menjadi `.env` dan isi sesuai kebutuhan.
 3. Tanpa `SQL_DSN`, app memakai SQLite lokal zero-config (`SQLITE_PATH`, default `./data/go-template.db`) — cocok untuk dev/proyek kecil. Isi `SQL_DSN=postgres://...` untuk PostgreSQL produksi. Install [Docker](https://www.docker.com/get-started) dan tools berikut:
 
-   - [swag](https://github.com/swaggo/swag) untuk generate Swagger docs (`make swag`)
+   - Swagger docs via `make swag` (hermetic: `go run swag@v1.16.6`, tanpa install global)
    - [gosec](https://github.com/securego/gosec), [go-critic](https://github.com/go-critic/go-critic), [golangci-lint](https://github.com/golangci/golangci-lint) untuk cek kualitas kode (dipakai oleh `make test`)
 
-4. Jalankan semuanya (Postgres + Redis + app):
+4. Jalankan (pilih satu):
 
 ```bash
-make docker.run
+make run                  # lokal, SQLite zero-config
+make compose.up           # app + redis (SQLite)
+make compose.up.postgres  # app + redis + postgres (isi SQL_DSN dulu)
 ```
 
-5. Buka Swagger: [127.0.0.1:5000/swagger/index.html](http://127.0.0.1:5000/swagger/index.html)
+5. Buka Swagger: [127.0.0.1:5000/swagger/index.html](http://127.0.0.1:5000/swagger/index.html), cek sehat: `curl 127.0.0.1:5000/healthz`
 
-Perintah lain: `make build`, `make test`, `make docker.stop`. Lihat `Makefile` untuk daftar lengkap.
+Perintah lain: `make build`, `make build.fast`, `make test`, `make swag`, `make compose.down`. Target `docker.*` legacy (deprecated). Lihat `make help` dan `Makefile` untuk daftar lengkap.
 
 ## 🗄 Struktur
 

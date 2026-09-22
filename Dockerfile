@@ -13,13 +13,28 @@ RUN go mod download
 COPY . .
 
 # Set necessary environment variables needed for our image and build the API server.
+# NOTE: glebarez/sqlite (modernc) is pure Go, so CGO_ENABLED=0 works on scratch/alpine.
 ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
 RUN go build -ldflags="-s -w" -o apiserver .
 
-FROM scratch
+FROM alpine:3.21
 
-# Copy binary and config files from /build to root folder of scratch container.
-COPY --from=builder ["/build/apiserver", "/build/.env", "/"]
+# CA certs + timezone needed for PostgreSQL TLS and time handling.
+RUN apk --no-cache add ca-certificates tzdata \
+	&& addgroup -S app && adduser -S app -G app
+
+WORKDIR /app
+
+# Copy only the binary — never bake .env into the image.
+# Provide config at runtime: `docker run --env-file .env ...` or via compose.
+COPY --from=builder /build/apiserver ./
+
+USER app
+
+EXPOSE 5000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+	CMD wget -qO- http://127.0.0.1:5000/healthz || exit 1
 
 # Command to run when starting the container.
-ENTRYPOINT ["/apiserver"]
+ENTRYPOINT ["./apiserver"]

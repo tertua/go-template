@@ -1,0 +1,52 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.27"
+          cache: true
+
+      - name: Build
+        run: go build ./...
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test -timeout 60s -cover ./...
+
+      - name: Swagger docs are fresh
+        run: |
+          go run github.com/swaggo/swag/cmd/swag@v1.16.6 init
+          git diff --exit-code -- docs/ || (echo "docs/ stale, run 'make swag' locally" && exit 1)
+
+  security-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.27"
+          cache: true
+
+      - name: gosec
+        run: |
+          go install github.com/securego/gosec/v2/cmd/gosec@latest
+          $(go env GOPATH)/bin/gosec ./...
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          args: run ./...

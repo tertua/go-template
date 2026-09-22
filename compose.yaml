@@ -1,0 +1,68 @@
+name: go-template
+
+# Hybrid default: `docker compose up` -> app (SQLite) + redis.
+# Postgres: `docker compose --profile postgres up` (+ set SQL_DSN=postgres://... di .env).
+services:
+  app:
+    build: .
+    env_file:
+      - .env
+    environment:
+      # Compose service DNS (override .env.example yang menunjuk ke container legacy).
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      SERVER_HOST: ${SERVER_HOST:-0.0.0.0}
+      SERVER_PORT: ${SERVER_PORT:-5000}
+    ports:
+      - "${SERVER_PORT:-5000}:5000"
+    volumes:
+      # Persist SQLite file outside the container.
+      - appdata:/data
+    depends_on:
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+        required: false
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:5000/healthz"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redisdata:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    profiles: ["postgres"]
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  appdata:
+  redisdata:
+  pgdata:

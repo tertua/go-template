@@ -30,6 +30,11 @@ import (
 // @in header
 // @name Authorization
 func main() {
+	// Fail fast on missing/insecure env before touching DB/Redis.
+	if err := configs.ValidateEnv(); err != nil {
+		log.Fatal("invalid env config: ", err)
+	}
+
 	// Define Fiber config.
 	config := configs.FiberConfig()
 
@@ -46,6 +51,7 @@ func main() {
 
 	// Routes.
 	routes.SwaggerRoute(app)  // Register a route for API Docs (Swagger).
+	routes.HealthRoute(app)   // Register liveness probe (must precede NotFoundRoute).
 	routes.PublicRoutes(app)  // Register a public routes for app.
 	routes.PrivateRoutes(app) // Register a private routes for app.
 	routes.NotFoundRoute(app) // Register route for 404 Error.
