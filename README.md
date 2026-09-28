@@ -49,4 +49,4 @@ Semua via `.env` (lihat `.env.example`). Yang wajib diganti untuk project baru: 
 
 ## ⚠️ License
 
-Apache 2.0. Karya asli &copy; [Vic Shóstak](https://shostak.dev/) & Create Go App Contributors (lihat `LICENSE`); modifikasi oleh pemilik repo ini.
+Apache 2.0. Karya asli &copy; [Vic Shóstak](https://shostak.dev/) & [Create Go App](https://github.com/create-go-app) Contributors (lihat `LICENSE`); modifikasi oleh [@tertua](https://github.com/tertua).
